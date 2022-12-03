@@ -5,7 +5,6 @@ Client window to show the countdown timed countdown and progressbar.
 Widget for just a progress bar that can be displayed over a presentation for the audience. 
 
 TODO
-    Add ability to add/remove time back in the of already running countdown.
     See about reducing the number of globals. TK seems to need a lot to be globals. May just need to make everything into a class.
 """
 import os, sys
@@ -41,6 +40,7 @@ minute_green = tk.StringVar(host_window, value="00")
 minute_yellow = tk.StringVar(host_window, value="00")
 minute_red = tk.StringVar(host_window, value="00")
 minute_flash = tk.StringVar(host_window, value="00")
+minute_shim = tk.StringVar(host_window, value="00")
 
 time = tk.DoubleVar(host_window, value=0)
 time_display = tk.StringVar(host_window, value="00:00")
@@ -95,13 +95,23 @@ def build_window():
     
     load_icons()
     play_button = ttk.Button(control_frame_2, image=play_icon, command=play)
-    play_button.pack(side="left", padx=20)
+    play_button.pack(side="left", padx=10)
     pause_button = ttk.Button(control_frame_2, image=pause_icon, command=pause)
-    pause_button.pack(side="left", padx=20)
+    pause_button.pack(side="left", padx=10)
     reset_button = ttk.Button(control_frame_2, image=reset_icon, command=reset)
-    reset_button.pack(side="left", padx=20)
+    reset_button.pack(side="left", padx=10)
     stop_button = ttk.Button(control_frame_2, image=stop_icon, command=stop)
-    stop_button.pack(side="left", padx=20)
+    stop_button.pack(side="left", padx=10)
+    
+    spacer_label = tk.Label(control_frame_2, text=" | ", height=4)
+    spacer_label.pack(side="left")
+    
+    plus_button = ttk.Button(control_frame_2, image=plus_icon, command=plus)
+    plus_button.pack(side="left", padx=5)
+    minuteEntry_shim = tk.Entry(control_frame_2, width=3, font=("Arial",18,""), textvariable=minute_shim)
+    minuteEntry_shim.pack(side="left")
+    minus_button = ttk.Button(control_frame_2, image=minus_icon, command=minus)
+    minus_button.pack(side="left", padx=5)
 
     control_frame_2.pack(side="top")
 
@@ -159,8 +169,9 @@ def reset():
     """Reset button event handler
     """
     global time, minute_total, current_bg, current_fg
-    if tick_listener is not None:
-        host_window.after_cancel(tick_listener)
+    # used to need this to prevent multiple listeners causing double speed countdown. I think this is fixed elsewhere due to abstracting some functions. Leaving for a bit until confirmed. 
+    #if tick_listener is not None:
+    #    host_window.after_cancel(tick_listener)
     time.set(float(minute_total.get()) * 60)
     progress_host.config(style=ts[0] + ".gray.Horizontal.TProgressbar")
     progress_client.config(style=ts[1] + ".gray.Horizontal.TProgressbar")
@@ -186,6 +197,24 @@ def play():
         reset()
     paused.set(False)
     tick_listener = host_window.after(1000, tick)
+
+def plus():
+    """Increase remaining time.
+    """
+    shim(float(minute_shim.get()))
+    
+def minus():
+    """Reduce remaining time.
+    """
+    shim(-float(minute_shim.get()))
+    
+def shim(minutes: float):
+    """Update running time to adjust allowing for more or less time.
+
+    :param minutes: Minutes to adjust to running time.
+    :type minutes: float
+    """
+    time.set(time.get() + minutes * 60)
 
 def tick():
     """Time tick event handler
@@ -295,11 +324,13 @@ def load_icons():
     
     TODO just create the icons dynamicly. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once. 
     """
-    global play_icon, stop_icon, pause_icon, reset_icon
+    global play_icon, stop_icon, pause_icon, reset_icon, plus_icon, minus_icon
     play_icon = tk.PhotoImage(file=resource_path('play.png'), master=host_window)
     stop_icon = tk.PhotoImage(file=resource_path('stop.png'), master=host_window)
     pause_icon = tk.PhotoImage(file=resource_path('pause.png'), master=host_window)
     reset_icon = tk.PhotoImage(file=resource_path('reset.png'), master=host_window)
+    plus_icon = tk.PhotoImage(file=resource_path('plus.png'), master=host_window)
+    minus_icon = tk.PhotoImage(file=resource_path('minus.png'), master=host_window)
 
 def mainloop():
     """Enter main TK GUI loop.
