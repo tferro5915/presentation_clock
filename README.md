@@ -8,6 +8,8 @@ Creates a presentation timer GUI.
 * Client window to show the countdown timer and progressbar. 
 * Widget for just a progress bar, that can be displayed over a presentation for the audience. 
 
+![Presentation_Timer](https://user-images.githubusercontent.com/8659479/205778720-cb85a346-42f1-469b-be0a-6ee92fadffad.png)
+
 ## Run
 
 * Open executable or run as a python script (`python main.py`).
