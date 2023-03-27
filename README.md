@@ -25,4 +25,4 @@ Creates a presentation timer GUI.
 * Open a terminal
 * Navigate to project folder
 * Run `pip install pyinstaller`
-* Run `pyinstaller --onefile --windowed --add-data "play.png;." --add-data "stop.png;." --add-data "pause.png;." --add-data "reset.png;." --add-data "plus.png;." --add-data "minus.png;." main.py`. Note `;` may need to be replaced with `:` when running in linux. 
+* Run `pyinstaller --onefile --windowed --add-data "Resources/play.png;." --add-data "Resources/stop.png;." --add-data "Resources/pause.png;." --add-data "Resources/reset.png;." --add-data "Resources/plus.png;." --add-data "Resources/minus.png;." Python/main.py`. Note `;` may need to be replaced with `:` when running in linux. 
