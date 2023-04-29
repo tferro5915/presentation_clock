@@ -7,7 +7,7 @@ Widget for just a progress bar that can be displayed over a presentation for the
 import os, sys, math
 import tkinter as tk
 from tkinter import ttk
-from datetime import timedelta, datetime, time
+from datetime import timedelta
 
 # Constants
 interval = timedelta(seconds=1)
