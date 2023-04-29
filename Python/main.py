@@ -3,11 +3,6 @@
 Host window for controlling/monitoring the timer. 
 Client window to show the countdown timed countdown and progressbar. 
 Widget for just a progress bar that can be displayed over a presentation for the audience. 
-
-TODO
-    Change play if time <= 0 reset to only if input value changed.
-    Maybe Create the icons dynamically. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once at start.
-    See about reducing the number of globals. TK seems to need a lot to be globals. May just need to make everything into a class.
 """
 import os, sys, math
 import tkinter as tk
@@ -52,8 +47,14 @@ progress = tk.DoubleVar(host_window, value=0)
 
 time = timedelta(seconds=0)
 paused = True
-
 tic_listener = None
+
+needs_reset = True
+def value_changed(*args): 
+    global needs_reset
+    needs_reset=True
+minute_total.trace_add("write", value_changed)
+
 
 
 def build_window():
@@ -173,7 +174,7 @@ def pause():
 def reset():
     """Reset button event handler
     """
-    global time, minute_total, current_bg, current_fg
+    global time, minute_total, current_bg, current_fg, needs_reset
     time = timedelta(minutes=float(minute_total.get()))
     progress_host.config(style=ts[0] + ".gray.Horizontal.TProgressbar")
     progress_client.config(style=ts[1] + ".gray.Horizontal.TProgressbar")
@@ -182,6 +183,7 @@ def reset():
     current_fg = fg[0]
     client_window.config(bg=current_bg)
     clock_display_client.config(fg=current_fg)
+    needs_reset = False
     toc()
 
 def stop():
@@ -194,7 +196,7 @@ def play():
     """Play button event handler
     """
     global paused, tic_listener
-    if time <= timedelta() or not paused:
+    if needs_reset or not paused:
         paused = True
         reset()
     paused = False
