@@ -9,6 +9,7 @@ TODO
     See about using timedelta. Probably more efficient. 
     Change play if time <= 0 reset to only if input value changed.
     Fix red seems coupled with less than zero.
+    Create the icons dynamically. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once.
 """
 import os, sys
 import tkinter as tk
@@ -38,12 +39,12 @@ current_fg = fg[0]
 current_bar = bar[0]
 
 # Placeholder variables in TK
-minute_total = tk.DoubleVar(host_window, value="00")
-minute_green = tk.StringVar(host_window, value="00")
-minute_yellow = tk.StringVar(host_window, value="00")
-minute_red = tk.StringVar(host_window, value="00")
-minute_flash = tk.StringVar(host_window, value="00")
-minute_shim = tk.StringVar(host_window, value="00")
+minute_total = tk.DoubleVar(host_window, value="00.0")
+minute_green = tk.StringVar(host_window, value="00.0")
+minute_yellow = tk.StringVar(host_window, value="00.0")
+minute_red = tk.StringVar(host_window, value="00.0")
+minute_flash = tk.StringVar(host_window, value="00.0")
+minute_shim = tk.StringVar(host_window, value="00.0")
 
 time = tk.DoubleVar(host_window, value=0)
 time_display = tk.StringVar(host_window, value="00:00")
@@ -68,27 +69,27 @@ def build_window():
 
     total_label = tk.Label(control_frame_1, text="Total", height=4)
     total_label.pack(side="left")
-    minuteEntry_total = tk.Entry(control_frame_1, width=3, font=("Arial",18,""), textvariable=minute_total)
+    minuteEntry_total = tk.Entry(control_frame_1, width=4, font=("Arial",12,""), textvariable=minute_total)
     minuteEntry_total.pack(side="left")
 
     green_label = tk.Label(control_frame_1, text="Green", height=4)
     green_label.pack(side="left")
-    minuteEntry_green = tk.Entry(control_frame_1, width=3, font=("Arial",18,""), textvariable=minute_green)
+    minuteEntry_green = tk.Entry(control_frame_1, width=4, font=("Arial",12,""), textvariable=minute_green)
     minuteEntry_green.pack(side="left")
 
     yellow_label = tk.Label(control_frame_1, text="Yellow", height=4)
     yellow_label.pack(side="left")
-    minuteEntry_yellow = tk.Entry(control_frame_1, width=3, font=("Arial",18,""), textvariable=minute_yellow)
+    minuteEntry_yellow = tk.Entry(control_frame_1, width=4, font=("Arial",12,""), textvariable=minute_yellow)
     minuteEntry_yellow.pack(side="left")
 
     red_label = tk.Label(control_frame_1, text="Red", height=4)
     red_label.pack(side="left")
-    minuteEntry_red = tk.Entry(control_frame_1, width=3, font=("Arial",18,""), textvariable=minute_red)
+    minuteEntry_red = tk.Entry(control_frame_1, width=4, font=("Arial",12,""), textvariable=minute_red)
     minuteEntry_red.pack(side="left")
 
     flash_label = tk.Label(control_frame_1, text="Flash", height=4)
     flash_label.pack(side="left")
-    minuteEntry_flash = tk.Entry(control_frame_1, width=3, font=("Arial",18,""), textvariable=minute_flash)
+    minuteEntry_flash = tk.Entry(control_frame_1, width=4, font=("Arial",12,""), textvariable=minute_flash)
     minuteEntry_flash.pack(side="left")
 
     control_frame_1.pack(side="top")
@@ -111,7 +112,7 @@ def build_window():
     
     plus_button = ttk.Button(control_frame_2, image=plus_icon, command=plus)
     plus_button.pack(side="left", padx=5)
-    minuteEntry_shim = tk.Entry(control_frame_2, width=3, font=("Arial",18,""), textvariable=minute_shim)
+    minuteEntry_shim = tk.Entry(control_frame_2, width=4, font=("Arial",12,""), textvariable=minute_shim)
     minuteEntry_shim.pack(side="left")
     minus_button = ttk.Button(control_frame_2, image=minus_icon, command=minus)
     minus_button.pack(side="left", padx=5)
@@ -172,9 +173,6 @@ def reset():
     """Reset button event handler
     """
     global time, minute_total, current_bg, current_fg
-    # used to need this to prevent multiple listeners causing double speed countdown. I think this is fixed elsewhere due to abstracting some functions. Leaving for a bit until confirmed. 
-    #if tic_listener is not None:
-    #    host_window.after_cancel(tic_listener)
     time.set(float(minute_total.get()) * 60)
     progress_host.config(style=ts[0] + ".gray.Horizontal.TProgressbar")
     progress_client.config(style=ts[1] + ".gray.Horizontal.TProgressbar")
@@ -319,14 +317,12 @@ def resource_path(relative_path: str) -> str:
     try:
         base_path = sys._MEIPASS
     except Exception:
-        base_path = os.path.abspath("../Resources/")
+        base_path = os.path.abspath("Resources/")
 
     return os.path.join(base_path, relative_path)
 
 def load_icons():
     """Loads the icons needed for buttons.
-    
-    TODO just create the icons dynamically. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once. 
     """
     global play_icon, stop_icon, pause_icon, reset_icon, plus_icon, minus_icon
     play_icon = tk.PhotoImage(file=resource_path('play.png'), master=host_window)
