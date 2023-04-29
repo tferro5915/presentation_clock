@@ -5,15 +5,17 @@ Client window to show the countdown timed countdown and progressbar.
 Widget for just a progress bar that can be displayed over a presentation for the audience. 
 
 TODO
-    See about reducing the number of globals. TK seems to need a lot to be globals. May just need to make everything into a class.
-    See about using timedelta. Probably more efficient. 
     Change play if time <= 0 reset to only if input value changed.
-    Fix red seems coupled with less than zero.
-    Create the icons dynamically. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once.
+    Maybe Create the icons dynamically. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once at start.
+    See about reducing the number of globals. TK seems to need a lot to be globals. May just need to make everything into a class.
 """
-import os, sys
+import os, sys, math
 import tkinter as tk
 from tkinter import ttk
+from datetime import timedelta, datetime, time
+
+# Constants
+interval = timedelta(seconds=1)
 
 # Window placeholders
 host_window = tk.Tk()
@@ -38,19 +40,18 @@ current_bg = bg[0]
 current_fg = fg[0]
 current_bar = bar[0]
 
-# Placeholder variables in TK
+# Placeholder variables in TK to hole GUI inputs/outputs
 minute_total = tk.DoubleVar(host_window, value="00.0")
 minute_green = tk.StringVar(host_window, value="00.0")
 minute_yellow = tk.StringVar(host_window, value="00.0")
 minute_red = tk.StringVar(host_window, value="00.0")
 minute_flash = tk.StringVar(host_window, value="00.0")
 minute_shim = tk.StringVar(host_window, value="00.0")
-
-time = tk.DoubleVar(host_window, value=0)
 time_display = tk.StringVar(host_window, value="00:00")
-
-paused = tk.BooleanVar(host_window, value=True)
 progress = tk.DoubleVar(host_window, value=0)
+
+time = timedelta(seconds=0)
+paused = True
 
 tic_listener = None
 
@@ -167,13 +168,13 @@ def pause():
     """Pause button event handler
     """
     global paused
-    paused.set(True)
+    paused = True
 
 def reset():
     """Reset button event handler
     """
     global time, minute_total, current_bg, current_fg
-    time.set(float(minute_total.get()) * 60)
+    time = timedelta(minutes=float(minute_total.get()))
     progress_host.config(style=ts[0] + ".gray.Horizontal.TProgressbar")
     progress_client.config(style=ts[1] + ".gray.Horizontal.TProgressbar")
     progress_widget.config(style=ts[2] + ".gray.Horizontal.TProgressbar")
@@ -193,38 +194,33 @@ def play():
     """Play button event handler
     """
     global paused, tic_listener
-    if time.get() <= 0 or not paused.get():
-        paused.set(True)
+    if time <= timedelta() or not paused:
+        paused = True
         reset()
-    paused.set(False)
-    tic_listener = host_window.after(1000, tic)
+    paused = False
+    tic_listener = host_window.after(math.floor(interval.total_seconds() * 1000), tic)
 
 def plus():
     """Increase remaining time.
     """
-    shim(float(minute_shim.get()))
+    global time
+    time = time + timedelta(minutes=float(minute_shim.get()))
+    toc()
     
 def minus():
     """Reduce remaining time.
     """
-    shim(-float(minute_shim.get()))
-    
-def shim(minutes: float):
-    """Update running time to adjust allowing for more or less time.
-
-    :param minutes: Minutes to adjust to running time.
-    :type minutes: float
-    """
-    time.set(time.get() + minutes * 60)
+    global time
+    time = time - timedelta(minutes=float(minute_shim.get()))
     toc()
 
 def tic():
     """Time tic event handler
     """
-    global time, time_display, paused, tic_listener
-    if not paused.get():
-        tic_listener = host_window.after(1000, tic)
-        time.set(time.get() - 1)
+    global time, paused, tic_listener
+    if not paused:
+        tic_listener = host_window.after(math.floor(interval.total_seconds() * 1000), tic)
+        time = time - interval
         toc()
 
 def toc():
@@ -232,41 +228,35 @@ def toc():
     """
     global time, time_display, progress, progress_host, progress_client, progress_widget, clock_display_client
 
-    if time.get() >= 0:
-        mins, secs = divmod(time.get(), 60)
-        time_display.set('{:02.0f}:{:02.0f}'.format(mins, secs))
-
-        progress.set(100 - (time.get() / (minute_total.get() * 60)) * 100)
-        if time.get() < float(minute_red.get()) * 60:
-            progress_host.config(style=ts[0] + ".red.Horizontal.TProgressbar")
-            progress_client.config(style=ts[1] + ".red.Horizontal.TProgressbar")
-            progress_widget.config(style=ts[2] + ".red.Horizontal.TProgressbar")
-        elif time.get() < float(minute_yellow.get()) * 60:
-            progress_host.config(style=ts[0] + ".yellow.Horizontal.TProgressbar")
-            progress_client.config(style=ts[1] + ".yellow.Horizontal.TProgressbar")
-            progress_widget.config(style=ts[2] + ".yellow.Horizontal.TProgressbar")
-        elif time.get() < float(minute_green.get()) * 60:
-            progress_host.config(style=ts[0] + ".green.Horizontal.TProgressbar")
-            progress_client.config(style=ts[1] + ".green.Horizontal.TProgressbar")
-            progress_widget.config(style=ts[2] + ".green.Horizontal.TProgressbar")
-        else: 
-            progress_host.config(style=ts[0] + ".gray.Horizontal.TProgressbar")
-            progress_client.config(style=ts[1] + ".gray.Horizontal.TProgressbar")
-            progress_widget.config(style=ts[2] + ".gray.Horizontal.TProgressbar")
+    if time >= timedelta():
+        mins, secs = divmod(time.total_seconds(), 60)
     else:
-        mins, secs = divmod(-time.get(), 60)
-        time_display.set('-{:02.0f}:{:02.0f}'.format(mins, secs))
-
-        progress.set(100)
-        progress_host.config(style=ts[0] + ".red.Horizontal.TProgressbar")
-        progress_client.config(style=ts[1] + ".red.Horizontal.TProgressbar")
-        progress_widget.config(style=ts[2] + ".red.Horizontal.TProgressbar")
-
-    if time.get() < float(minute_flash.get()) * 60:
+        mins, secs = divmod(time.total_seconds(), -60)
+    time_display.set('{:02.0f}:{:02.0f}'.format(mins, secs))
+    progress_ = 100 - (time / (timedelta(minutes=float(minute_total.get())))) * 100
+    progress.set(max(min(progress_,100),0))
+        
+    if time <= timedelta(minutes=float(minute_flash.get())):
         toggle_bg()
         client_window.config(bg=current_bg)
         clock_display_client.config(fg=current_fg)
         progress_widget.config(style=ts[2] + "." + current_bar + ".Horizontal.TProgressbar")
+    elif time <= timedelta(minutes=float(minute_red.get())):
+        progress_host.config(style=ts[0] + ".red.Horizontal.TProgressbar")
+        progress_client.config(style=ts[1] + ".red.Horizontal.TProgressbar")
+        progress_widget.config(style=ts[2] + ".red.Horizontal.TProgressbar")
+    elif time <= timedelta(minutes=float(minute_yellow.get())):
+        progress_host.config(style=ts[0] + ".yellow.Horizontal.TProgressbar")
+        progress_client.config(style=ts[1] + ".yellow.Horizontal.TProgressbar")
+        progress_widget.config(style=ts[2] + ".yellow.Horizontal.TProgressbar")
+    elif time <= timedelta(minutes=float(minute_green.get())):
+        progress_host.config(style=ts[0] + ".green.Horizontal.TProgressbar")
+        progress_client.config(style=ts[1] + ".green.Horizontal.TProgressbar")
+        progress_widget.config(style=ts[2] + ".green.Horizontal.TProgressbar")
+    else: 
+        progress_host.config(style=ts[0] + ".gray.Horizontal.TProgressbar")
+        progress_client.config(style=ts[1] + ".gray.Horizontal.TProgressbar")
+        progress_widget.config(style=ts[2] + ".gray.Horizontal.TProgressbar")
 
 def toggle_bg():
     """Flash background (toggle normal and inverted colors)
