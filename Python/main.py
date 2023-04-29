@@ -6,6 +6,9 @@ Widget for just a progress bar that can be displayed over a presentation for the
 
 TODO
     See about reducing the number of globals. TK seems to need a lot to be globals. May just need to make everything into a class.
+    See about using timedelta. Probably more efficient. 
+    Change play if time <= 0 reset to only if input value changed.
+    Fix red seems coupled with less than zero.
 """
 import os, sys
 import tkinter as tk
@@ -48,7 +51,7 @@ time_display = tk.StringVar(host_window, value="00:00")
 paused = tk.BooleanVar(host_window, value=True)
 progress = tk.DoubleVar(host_window, value=0)
 
-tick_listener = None
+tic_listener = None
 
 
 def build_window():
@@ -170,8 +173,8 @@ def reset():
     """
     global time, minute_total, current_bg, current_fg
     # used to need this to prevent multiple listeners causing double speed countdown. I think this is fixed elsewhere due to abstracting some functions. Leaving for a bit until confirmed. 
-    #if tick_listener is not None:
-    #    host_window.after_cancel(tick_listener)
+    #if tic_listener is not None:
+    #    host_window.after_cancel(tic_listener)
     time.set(float(minute_total.get()) * 60)
     progress_host.config(style=ts[0] + ".gray.Horizontal.TProgressbar")
     progress_client.config(style=ts[1] + ".gray.Horizontal.TProgressbar")
@@ -180,7 +183,7 @@ def reset():
     current_fg = fg[0]
     client_window.config(bg=current_bg)
     clock_display_client.config(fg=current_fg)
-    update_display()
+    toc()
 
 def stop():
     """Stop button event handler
@@ -191,12 +194,12 @@ def stop():
 def play():
     """Play button event handler
     """
-    global paused, tick_listener
+    global paused, tic_listener
     if time.get() <= 0 or not paused.get():
         paused.set(True)
         reset()
     paused.set(False)
-    tick_listener = host_window.after(1000, tick)
+    tic_listener = host_window.after(1000, tic)
 
 def plus():
     """Increase remaining time.
@@ -215,17 +218,18 @@ def shim(minutes: float):
     :type minutes: float
     """
     time.set(time.get() + minutes * 60)
+    toc()
 
-def tick():
-    """Time tick event handler
+def tic():
+    """Time tic event handler
     """
-    global time, time_display, paused, tick_listener
+    global time, time_display, paused, tic_listener
     if not paused.get():
-        tick_listener = host_window.after(1000, tick)
+        tic_listener = host_window.after(1000, tic)
         time.set(time.get() - 1)
-        update_display()
+        toc()
 
-def update_display():
+def toc():
     """Updates display when event handlers require it
     """
     global time, time_display, progress, progress_host, progress_client, progress_widget, clock_display_client
@@ -315,14 +319,14 @@ def resource_path(relative_path: str) -> str:
     try:
         base_path = sys._MEIPASS
     except Exception:
-        base_path = os.path.abspath("Resources/")
+        base_path = os.path.abspath("../Resources/")
 
     return os.path.join(base_path, relative_path)
 
 def load_icons():
     """Loads the icons needed for buttons.
     
-    TODO just create the icons dynamicly. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once. 
+    TODO just create the icons dynamically. They are small simple shapes. Would reduce filesize and have almost no impact on performance to gen once. 
     """
     global play_icon, stop_icon, pause_icon, reset_icon, plus_icon, minus_icon
     play_icon = tk.PhotoImage(file=resource_path('play.png'), master=host_window)
