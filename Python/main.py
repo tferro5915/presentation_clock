@@ -3,6 +3,8 @@
 Host window for controlling/monitoring the timer. 
 Client window to show the countdown timed countdown and progressbar. 
 Widget for just a progress bar that can be displayed over a presentation for the audience. 
+
+TODO: Update client to be resizable for different resolutions/screen-size
 """
 import os, sys, math
 import tkinter as tk
