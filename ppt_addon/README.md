@@ -1,6 +1,6 @@
 # Presentation Clock (PowerPoint Add-On)
 
-![PresentationTimer](https://github.com/user-attachments/assets/672cb840-b189-4f28-8b23-1e86aad48385)
+![PresentationTimer](https://github.com/user-attachments/assets/24288f21-0f4f-4fa2-a3ae-1fe0bca0246f)
 
 ## Build
 
