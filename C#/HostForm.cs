@@ -52,9 +52,19 @@ namespace presentation_clock
 
         public void Toc()
         {
+            double t;
+            try
+            {
+                t = double.Parse(total.Text);
+            }
+            catch (System.FormatException e)
+            {
+                return;
+            }
+
             // Update Progress
             time_display = (time < TimeSpan.Zero ? "-" : "") + $"{time:mm\\:ss}";
-            progress = (int)(1000 - time.TotalSeconds / (double.Parse(total.Text) * 60) * 1000);
+            progress = (int)(1000 - time.TotalSeconds / (t * 60) * 1000);
             progress = Math.Min(Math.Max(0, progress), 1000);
 
             if (time <= TimeSpan.FromMinutes(double.Parse(flash.Text)))
@@ -152,6 +162,12 @@ namespace presentation_clock
         {
             time = time - TimeSpan.FromMinutes(double.Parse(shim.Text));
             Toc();
+        }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            client.Close();
+            widget.Close();
+            base.OnFormClosing(e);
         }
     }
 }

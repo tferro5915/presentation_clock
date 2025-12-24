@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.progress_bar = new System.Windows.Forms.ProgressBar();
+            //this.progress_bar = new System.Windows.Forms.ProgressBar();
+            this.progress_bar = new CustomizableProgressBar();
             this.SuspendLayout();
             // 
             // progress_bar
@@ -64,6 +65,7 @@
 
         #endregion
 
-        private System.Windows.Forms.ProgressBar progress_bar;
+        //private System.Windows.Forms.ProgressBar progress_bar;
+        private CustomizableProgressBar progress_bar;
     }
 }

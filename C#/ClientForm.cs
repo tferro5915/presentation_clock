@@ -28,6 +28,7 @@ namespace presentation_clock
 
         private void ClientForm_Resize(object sender, System.EventArgs e)
         {
+            if (original_width == 0 || original_height == 0) return;
             double width_resize = Width / (float) original_width;
             double height_resize = Height / (float) original_height;
             double resize = Math.Sqrt(width_resize * height_resize);  // Geometric mean

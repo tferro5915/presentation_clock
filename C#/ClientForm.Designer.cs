@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.progress_bar = new System.Windows.Forms.ProgressBar();
+            //this.progress_bar = new System.Windows.Forms.ProgressBar();
+            this.progress_bar = new CustomizableProgressBar();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.current = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
@@ -100,7 +101,8 @@
 
         #endregion
 
-        private System.Windows.Forms.ProgressBar progress_bar;
+        //private System.Windows.Forms.ProgressBar progress_bar;
+        private CustomizableProgressBar progress_bar;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label current;
     }

@@ -46,7 +46,8 @@
             this.button_reset = new System.Windows.Forms.Button();
             this.shim = new System.Windows.Forms.TextBox();
             this.current = new System.Windows.Forms.Label();
-            this.progress_bar = new System.Windows.Forms.ProgressBar();
+            //this.progress_bar = new System.Windows.Forms.ProgressBar();
+            this.progress_bar = new CustomizableProgressBar();
             this.SuspendLayout();
             // 
             // button_play
@@ -286,7 +287,8 @@
         private System.Windows.Forms.Button button_reset;
         private System.Windows.Forms.TextBox shim;
         private System.Windows.Forms.Label current;
-        private System.Windows.Forms.ProgressBar progress_bar;
+        //private System.Windows.Forms.ProgressBar progress_bar;
+        private CustomizableProgressBar progress_bar;
     }
 }
 
