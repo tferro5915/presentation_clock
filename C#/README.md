@@ -1,6 +1,6 @@
 # Presentation Clock (made with C#)
 
-![Presentation_Timer]()
+![Presentation_Timer](https://github.com/user-attachments/assets/672cb840-b189-4f28-8b23-1e86aad48385)
 
 ## Build
 
